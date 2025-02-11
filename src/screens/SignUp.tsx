@@ -5,6 +5,9 @@ import {
   Text,
   Heading,
   ScrollView,
+  useToast,
+  Toast,
+  ToastTitle,
 } from "@gluestack-ui/themed";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -15,6 +18,10 @@ import { Button } from "@components/Button";
 import { useNavigation } from "@react-navigation/native";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
 import { useForm, Controller } from "react-hook-form";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import { useState } from "react";
+import { useAuth } from "@hooks/useAuth";
 
 type FormDataProps = {
   name: string;
@@ -30,10 +37,18 @@ const signUpSchema = yup.object({
     .string()
     .required("Informe a senha")
     .min(6, "A senha deve ter pelo menos 6 dígitos"),
-  password_confirm: yup.string().required("Confirme a senha").oneOf([yup.ref("password"), ""], "A confirmação da senha não confere."),
+  password_confirm: yup
+    .string()
+    .required("Confirme a senha")
+    .oneOf([yup.ref("password"), ""], "A confirmação da senha não confere."),
 });
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
+
+  const { signIn } = useAuth();
+
   const {
     control,
     handleSubmit,
@@ -48,13 +63,29 @@ export function SignUp() {
     navigation.navigate("signIn");
   }
 
-  function handleSignUp({
-    name,
-    email,
-    password,
-    password_confirm,
-  }: FormDataProps) {
-    console.log({ name, email, password, password_confirm });
+  async function handleSignUp({ name, email, password }: FormDataProps) {
+    try {
+      setIsLoading(true);
+      await api.post("/users", { name, email, password });
+      await signIn(email, password);
+
+    } catch (error) {
+      setIsLoading(false);
+
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível criar a conta. Tente novamente mais tarde";
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast backgroundColor="$red500" action="error" variant="outline">
+            <ToastTitle color="$white">{title}</ToastTitle>
+          </Toast>
+        ),
+      });
+    }
   }
 
   return (
@@ -143,6 +174,7 @@ export function SignUp() {
             <Button
               title="Criar e acessar"
               onPress={handleSubmit(handleSignUp)}
+              isLoading={isLoading}
             />
           </Center>
 
