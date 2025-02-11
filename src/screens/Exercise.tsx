@@ -4,24 +4,68 @@ import {
   Icon,
   Text,
   VStack,
-  Image,
   Box,
+  Toast,
+  ToastTitle,
+  useToast,
 } from "@gluestack-ui/themed";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { ArrowLeft } from "lucide-react-native";
 import { ScrollView, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 
 import BodySvg from "@assets/body.svg";
 import SeriesSvg from "@assets/series.svg";
 import RepetitionSvg from "@assets/repetitions.svg";
 import { Button } from "@components/Button";
+import { AppError } from "@utils/AppError";
+import { api } from "@services/api";
+import { useEffect, useState } from "react";
+import { ExerciseDTO } from "@dtos/ExerciseDTO";
+
+type RouteParamsProps = {
+  exerciseId: string;
+};
 
 export function Exercise() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
+  const route = useRoute();
+  const toast = useToast();
+
+  const { exerciseId } = route.params as RouteParamsProps;
+
+  const [exercise, setExercise] = useState<ExerciseDTO>({} as ExerciseDTO);
+
   function handleGoBack() {
     navigation.goBack();
   }
+
+  async function fetchExerciseDetails() {
+    try {
+      const response = await api.get(`/exercises/${exerciseId}`);
+      setExercise(response.data);
+    } catch (error) {
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível carregar os detalhes do exercícios";
+
+      toast.show({
+        placement: "top",
+        render: () => (
+          <Toast backgroundColor="$red500" action="error" variant="outline">
+            <ToastTitle color="$white">{title}</ToastTitle>
+          </Toast>
+        ),
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchExerciseDetails();
+  }, [exerciseId]);
+
   return (
     <VStack flex={1}>
       <VStack px="$8" bg="$gray600" pt="$12">
@@ -41,12 +85,12 @@ export function Exercise() {
             fontSize="$lg"
             flexShrink={1}
           >
-            Puxada frontal
+            {exercise.name}
           </Heading>
           <HStack alignItems="center">
             <BodySvg />
             <Text color="$gray200" ml="$1" textTransform="capitalize">
-              Costas
+              {exercise.group}
             </Text>
           </HStack>
         </HStack>
@@ -57,39 +101,15 @@ export function Exercise() {
         contentContainerStyle={{ paddingBottom: 32 }}
       >
         <VStack p="$8">
-          <Image
-            source={{
-              uri: "https://a-static.mlcdn.com.br/1500x1500/barra-fixa-mista-paralela-parede-costas-academia-musculacao-oestesom/oestesomloja/134028/7bb0eb589a502b3277026527f27efc67.jpeg",
-            }}
-            alt="Exercício"
-            mb="$3"
-            resizeMode="cover"
-            rounded="$lg"
-            w="$full"
-            h="$80"
-          />
-
-          <Box bg="$gray600" rounded="$md" pb="$4" px="$4">
-            <HStack
-              alignItems="center"
-              justifyContent="space-around"
-              mb="$6"
-              mt="$5"
-            >
-              <HStack>
-                <SeriesSvg />
-                <Text color="$gray200" ml="$2">
-                  3 séries
-                </Text>
-              </HStack>
-              <HStack>
-                <RepetitionSvg />
-                <Text color="$gray200" ml="$2">
-                  12 repetições
-                </Text>
-              </HStack>
-            </HStack>
-            <Button title="Marcar como realizado" />
+          <Box rounded="$lg" mb="$3" overflow="hidden">
+            <Image
+              source={{
+                uri: `${api.defaults.baseURL}/exercise/demo/${exercise?.demo}`,
+              }}
+              alt="Exercicio"
+              contentFit="cover"
+              style={{ width: "100%", height: 320, borderRadius: 8 }}
+            />
           </Box>
 
           <Box bg="$gray600" rounded="$md" pb="$4" px="$4">
@@ -102,13 +122,13 @@ export function Exercise() {
               <HStack>
                 <SeriesSvg />
                 <Text color="$gray200" ml="$2">
-                  3 séries
+                  {exercise.series} séries
                 </Text>
               </HStack>
               <HStack>
                 <RepetitionSvg />
                 <Text color="$gray200" ml="$2">
-                  12 repetições
+                {exercise.repetitions} repetições
                 </Text>
               </HStack>
             </HStack>
