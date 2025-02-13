@@ -2,16 +2,9 @@ import { ExerciseCard } from "@components/ExerciseCard";
 import { Group } from "@components/Group";
 import { HomeHeader } from "@components/HomeHeader";
 import { Loading } from "@components/Loading";
+import { ToastMessage } from "@components/ToastMessage";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
-import {
-  Heading,
-  HStack,
-  Text,
-  Toast,
-  ToastTitle,
-  useToast,
-  VStack,
-} from "@gluestack-ui/themed";
+import { Heading, HStack, Text, useToast, VStack } from "@gluestack-ui/themed";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AppNavigatorRoutesProps } from "@routes/app.routes";
 import { api } from "@services/api";
@@ -29,7 +22,7 @@ export function Home() {
   const navigation = useNavigation<AppNavigatorRoutesProps>();
 
   function handleOpenExercisesDetails(exerciseId: string) {
-    navigation.navigate('exercise', { exerciseId });
+    navigation.navigate("exercise", { exerciseId });
   }
 
   async function fetchGroups() {
@@ -44,10 +37,14 @@ export function Home() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
     }
@@ -67,10 +64,14 @@ export function Home() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
     } finally {
@@ -126,7 +127,10 @@ export function Home() {
             data={exercises}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <ExerciseCard data={item} onPress={() => handleOpenExercisesDetails(item.id)} />
+              <ExerciseCard
+                data={item}
+                onPress={() => handleOpenExercisesDetails(item.id)}
+              />
             )}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}

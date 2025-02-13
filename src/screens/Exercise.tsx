@@ -5,8 +5,6 @@ import {
   Text,
   VStack,
   Box,
-  Toast,
-  ToastTitle,
   useToast,
 } from "@gluestack-ui/themed";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -24,6 +22,7 @@ import { api } from "@services/api";
 import { useEffect, useState } from "react";
 import { ExerciseDTO } from "@dtos/ExerciseDTO";
 import { Loading } from "@components/Loading";
+import { ToastMessage } from "@components/ToastMessage";
 
 type RouteParamsProps = {
   exerciseId: string;
@@ -57,10 +56,14 @@ export function Exercise() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
     } finally {
@@ -76,17 +79,18 @@ export function Exercise() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$green700" action="success" variant="outline">
-            <ToastTitle color="$white">
-              Parabéns! Exercício registrado no seu histórico.
-            </ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="success"
+            onClose={() => toast.close(id)}
+            title="Sucesso"
+            description="Parabéns! Exercício registrado no seu histórico."
+          />
         ),
       });
 
-      navigation.navigate('history')
-      
+      navigation.navigate("history");
     } catch (error) {
       const isAppError = error instanceof AppError;
       const title = isAppError
@@ -95,10 +99,14 @@ export function Exercise() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
     } finally {

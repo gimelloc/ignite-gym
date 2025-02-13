@@ -6,8 +6,6 @@ import {
   Heading,
   ScrollView,
   useToast,
-  Toast,
-  ToastTitle,
 } from "@gluestack-ui/themed";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -22,6 +20,7 @@ import { api } from "@services/api";
 import { AppError } from "@utils/AppError";
 import { useState } from "react";
 import { useAuth } from "@hooks/useAuth";
+import { ToastMessage } from "@components/ToastMessage";
 
 type FormDataProps = {
   name: string;
@@ -68,7 +67,6 @@ export function SignUp() {
       setIsLoading(true);
       await api.post("/users", { name, email, password });
       await signIn(email, password);
-
     } catch (error) {
       setIsLoading(false);
 
@@ -79,10 +77,14 @@ export function SignUp() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
     }

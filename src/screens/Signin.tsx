@@ -6,8 +6,6 @@ import {
   Heading,
   ScrollView,
   useToast,
-  Toast,
-  ToastTitle,
 } from "@gluestack-ui/themed";
 import BackgroundImg from "@assets/background.png";
 import Logo from "@assets/logo.svg";
@@ -19,6 +17,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useAuth } from "@hooks/useAuth";
 import { AppError } from "@utils/AppError";
 import { useState } from "react";
+import { ToastMessage } from "@components/ToastMessage";
 
 type FormData = {
   email: string;
@@ -55,10 +54,14 @@ export function SignIn() {
 
       toast.show({
         placement: "top",
-        render: () => (
-          <Toast backgroundColor="$red500" action="error" variant="outline">
-            <ToastTitle color="$white">{title}</ToastTitle>
-          </Toast>
+        render: ({ id }) => (
+          <ToastMessage
+            id={id}
+            action="error"
+            onClose={() => toast.close(id)}
+            title="Erro"
+            description={title}
+          />
         ),
       });
 
@@ -121,7 +124,11 @@ export function SignIn() {
               )}
             />
 
-            <Button title="Acessar" isLoading={isLoading} onPress={handleSubmit(handleSignIn)} />
+            <Button
+              title="Acessar"
+              isLoading={isLoading}
+              onPress={handleSubmit(handleSignIn)}
+            />
           </Center>
 
           <Center flex={1} justifyContent="flex-end" mt="$4">
