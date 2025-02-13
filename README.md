@@ -1,6 +1,6 @@
-# Ignite Gym - React Native 
+# Ignite Gym
 
-Realizado durante a trilha do Ignite da Rocketseat.
+Realizado durante a trilha de React Native da Rocketseat.
 
 O Ignite Gym é uma aplicação de gerenciamento de uma academia, onde o usuário pode fazer o cadastro de membros, treinos, entre outros. Algumas das funcionalidades principais do projeto incluem:
 
