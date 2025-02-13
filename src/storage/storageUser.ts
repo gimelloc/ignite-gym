@@ -15,6 +15,5 @@ export async function storageUserGet(){
 }
 
 export async function storageUserRemove(){
-    console.log('chegou aqui')
     await AsyncStorage.removeItem(USER_STORAGE);
 }
